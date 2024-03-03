@@ -1,3 +1,4 @@
+@Library("sunnylibs") _
 pipeline{
     agent any
     stages{
@@ -9,12 +10,8 @@ pipeline{
         }
         stage("Deploy Tomcat"){
             steps{
-                sshagent(['Tomcat-Dev']) {
-                  // copy war
-                  sh "scp target/myweb-0.0.9.war ec2-user@172.31.25.115:/opt/tomcat9/webapps"
-                  sh "ssh ec2-user@172.31.25.115 /opt/tomcat9/bin/shutdown.sh"
-                  sh "ssh ec2-user@172.31.25.115 /opt/tomcat9/bin/startup.sh"
-                }   
+                tomcatDeploy("172.31.25.115","ec2-user","Tomcat-Dev")
+                 
             }
             
         }
