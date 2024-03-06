@@ -1,29 +1,37 @@
-@Library("sunnylibs") _
 pipeline{
     agent any
     stages{
-        stage("Checkout Git"){
+        stage("Git checkout"){
             steps{
-              git branch: 'develop', 
-              credentialsId: 'github-creds', 
-              url: 'https://github.com/sunnymarconi/my-app.git'  
+                git branch: 'develop', credentialsId: 'github-creds', url: 'https://github.com/sunnymarconi/my-app.git'
             }
-            
         }
-        stage("Maven build"){
+        stage("Maven package"){
             steps{
                 sh "mvn clean package"
-                echo "Build is successfull"
             }
-            
         }
-        stage("Deployment"){
+        stage("Docker build"){
             steps{
-                deployTomcat("172.31.25.115","ec2-user","Tomcat-Dev")
-                echo"${env.BRANCH_NAME}"
-                
+                sh "docker build -t sunnysinha/sunnyapp:${env.BUILD_NUMBER} ."
             }
-            
         }
+        stage("Dockerhub push"){
+            steps{
+                withCredentials([usernamePassword(credentialsId: 'docker-cred', passwordVariable: 'pwd', usernameVariable: 'user')]) {
+                    sh "docker login -u ${user} -p ${pwd}"
+                    sh "docker push sunnysinha/sunnyapp:${env.BUILD_NUMBER}"
+                }
+            }
+        }
+        stage("Docker deploy-dev"){
+            steps{
+                sshagent(['docker-dev-ssh']) {
+                sh "ssh -o StrictHostKeyChecking=no ec2-user@172.31.38.79 docker run -d -p 8080:8080 --name sunnyapp sunnysinha/sunnyapp:${env.BUILD_NUMBER}"
+                }
+            }
+        }
+        
+        
     }
 }
