@@ -2,16 +2,26 @@
 pipeline{
     agent any
     stages{
-        stage("Maven Build"){
+        stage("Checkout Git"){
             steps{
-                sh "mvn clean package"
+              git branch: 'develop', 
+              credentialsId: 'github-creds', 
+              url: 'https://github.com/sunnymarconi/my-app.git'  
             }
             
         }
-        stage("Deploy Tomcat"){
+        stage("Maven build"){
             steps{
-                tomcatDeploy("172.31.25.115","ec2-user","Tomcat-Dev")
-                 
+                sh "mvn clean package"
+                echo "Build is successfull"
+            }
+            
+        }
+        stage("Deployment"){
+            steps{
+                deployTomcat("172.31.25.115","ec2-user","Tomcat-Dev")
+                echo"${env.BRANCH_NAME}"
+                
             }
             
         }
