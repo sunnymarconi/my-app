@@ -15,6 +15,7 @@ pipeline{
             }
             steps{
                 echo "Deployed to dev...."
+                sh "branch name ${env.BRANCH_NAME}"
             }
         }
         stage("Deployed to qa"){
