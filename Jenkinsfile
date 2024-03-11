@@ -1,19 +1,37 @@
-@Library("mylibs") _
-pipeline {
-  agent any
-  tools {
-    maven 'maven2'
-  }
-  stages{
-    stage("Maven Build"){
-      steps{
-        sh "mvn clean package"
-      }
+pipeline{
+    agent any
+    stages{
+        stage("Maven Build"){
+            when {
+                branch "develop"
+            }
+            steps{
+                sh"mvn clean package"
+            }
+        }
+        stage("Deploy to Development"){
+            when {
+                branch "develop"
+            }
+            steps{
+                echo "Deployed to dev...."
+            }
+        }
+        stage("Deployed to qa"){
+            when {
+                branch "qa"
+            }
+            steps {
+                echo "deploying to qa ...."
+            }
+        }
+        stage("deploy to production"){
+            when {
+                branch "master"
+            }
+            steps{
+                echo "deploying to production..."
+            }
+        }
     }
-    stage("Deploy To Dev"){
-      steps{
-        tomcatDeploy("tomcat-dev","ec2-user",["172.31.13.89","172.31.13.89"])
-      }
-    }
-  }
 }
