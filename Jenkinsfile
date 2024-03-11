@@ -1,37 +1,37 @@
 pipeline{
     agent any
     stages{
-        stage("Git checkout"){
+        stage("Maven Build"){
+            when {
+                branch "develop"
+            }
             steps{
-                git branch: 'develop', credentialsId: 'github-creds', url: 'https://github.com/sunnymarconi/my-app.git'
+                sh"mvn clean package"
             }
         }
-        stage("Maven package"){
+        stage("Deploy to Development"){
+            when {
+                branch "develop"
+            }
             steps{
-                sh "mvn clean package"
+                echo "Deployed to dev...."
             }
         }
-        stage("Docker build"){
-            steps{
-                sh "docker build -t sunnysinha/sunnyapp:${env.BUILD_NUMBER} ."
+        stage("Deployed to qa"){
+            when {
+                branch "qa"
+            }
+            steps {
+                echo "deploying to qa ...."
             }
         }
-        stage("Dockerhub push"){
+        stage("deploy to production"){
+            when {
+                branch "master"
+            }
             steps{
-                withCredentials([usernamePassword(credentialsId: 'docker-cred', passwordVariable: 'pwd', usernameVariable: 'user')]) {
-                    sh "docker login -u ${user} -p ${pwd}"
-                    sh "docker push sunnysinha/sunnyapp:${env.BUILD_NUMBER}"
-                }
+                echo "deploying to production..."
             }
         }
-        stage("Docker deploy-dev"){
-            steps{
-                sshagent(['docker-dev-ssh']) {
-                sh "ssh -o StrictHostKeyChecking=no ec2-user@172.31.38.79 docker run -d -p 8080:8080 --name sunnyapp sunnysinha/sunnyapp:${env.BUILD_NUMBER}"
-                }
-            }
-        }
-        
-        
     }
 }
