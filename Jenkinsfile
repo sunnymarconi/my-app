@@ -24,7 +24,7 @@ pipeline{
             }
             steps {
                 echo "deploying to qa ...."
-                echo " branch name ${env.BRANCH_NAME}
+                echo "  ${env.BRANCH_NAME} "
                 
             }
         }
