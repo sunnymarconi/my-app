@@ -21,15 +21,18 @@ pipeline{
                 branch 'develop'
             }
             steps{
-                echo "Deployed to Development"
+                echo "Deployed to dev...."
+                sh "branch name ${env.BRANCH_NAME}"
+
             }
         }
         stage("Deploy to qa"){
             when {
                 branch 'qa'
             }
-            steps{
-                echo "Deployed to qa"
+            steps {
+                echo "deploying to qa ...."
+                echo "  ${env.BRANCH_NAME} "
             }
         }
         stage("Deploy to production"){
@@ -38,6 +41,7 @@ pipeline{
             }
             steps{
                 echo "Deployed to production"
+                echo "${env.BRANCH_NAME}"
             }
             
         }
