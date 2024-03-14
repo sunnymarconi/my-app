@@ -1,36 +1,46 @@
 pipeline{
     agent any
     stages{
-        stage("Maven Build"){
-            when {
-                branch "develop"
-            }
+        stage("Maven Build){
             steps{
-                sh"mvn clean package"
+                sh "mvn clean package"
+            }
+        }
+        stage("Docker build"){
+            steps{
+                sh "docker build -t sunnysinha/tomcatapp:v1 ."
+            }
+        }
+        stage("Docker Push"){
+            steps{
+                echo "Pushing to Docker hub"
             }
         }
         stage("Deploy to Development"){
             when {
-                branch "develop"
+                branch 'develop'
             }
             steps{
-                echo "Deployed to dev...."
+                echo "Deployed to Development"
             }
         }
-        stage("Deployed to qa"){
+        stage("Deploy to qa"){
             when {
-                branch "qa"
-            }
-            steps {
-                echo "deploying to qa ...."
-            }
-        }
-        stage("deploy to production"){
-            when {
-                branch "master"
+                branch 'qa'
             }
             steps{
-                echo "deploying to production..."
+                echo "Deployed to qa"
+            }
+        }
+        stage("Deploy to production"){
+            when {
+                branch 'master'
+            }
+            steps{
+                echo "Deployed to production"
+            }
+            input {
+              message 'Deploy to prod?'
             }
         }
     }
