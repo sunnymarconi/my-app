@@ -39,9 +39,7 @@ pipeline{
             steps{
                 echo "Deployed to production"
             }
-            input {
-              message 'Deploy to prod?'
-            }
+            
         }
     }
 }
