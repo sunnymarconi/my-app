@@ -1,3 +1,4 @@
+@Library("tomcatlibs") _
 pipeline{
     agent any
     stages{
@@ -5,45 +6,35 @@ pipeline{
             steps{
                 sh "mvn clean package"
             }
-        }
-        stage("Docker build"){
-            steps{
-                sh "docker build -t sunnysinha/tomcatapp:v1 ."
+            post {
+              success {
+                echo "build was successfully done"
+              }
             }
         }
-        stage("Docker Push"){
-            steps{
-                echo "Pushing to Docker hub"
-            }
-        }
-        stage("Deploy to Development"){
+        stage("tomcat deploy develop"){
             when {
-                branch 'develop'
+                branch "develop"
             }
             steps{
-                echo "Deployed to dev...."
-                sh "branch name ${env.BRANCH_NAME}"
-
+                tomcatdeploy("172.31.80.36","ec2-user","tomcat-dev")
+            }
+            input {
+              message 'Are you sure?'
+              ok 'yes'
             }
         }
-        stage("Deploy to qa"){
+        stage("tomcat deploy qa"){
             when {
-                branch 'qa'
-            }
-            steps {
-                echo "deploying to qa ...."
-                echo "  ${env.BRANCH_NAME} "
-            }
-        }
-        stage("Deploy to production"){
-            when {
-                branch 'master'
+                branch "qa"
             }
             steps{
-                echo "Deployed to production"
-                echo "${env.BRANCH_NAME}"
+                tomcatdeploy("172.31.23.164","ec2-user","tomcat-dev-qa")
             }
-            
+            input {
+              message 'Are you sure?'
+              ok 'yes'
+            }
         }
     }
 }
