@@ -13,6 +13,9 @@ pipeline{
             }
         }
         stage("tomcat deploy"){
+            when {
+                branch "develop"
+            }
             steps{
                 tomcatdeploy("172.31.80.36","ec2-user","tomcat-dev")
             }
