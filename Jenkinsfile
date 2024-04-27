@@ -1,27 +1,23 @@
-@Library("tomcatlibs") _
+@Library("sunnylibs") _
 pipeline{
     agent any
     stages{
+        stage("Git Checkout"){
+            steps{
+                git branch: 'develop', credentialsId: 'git-id', url: 'https://github.com/sunnymarconi/my-app.git'
+            }
+        }
         stage("Maven Build"){
             steps{
                 sh "mvn clean package"
             }
-            post {
-              success {
-                echo "build was successfully done"
-              }
-            }
         }
-        stage("tomcat deploy develop"){
+        stage("tomcat deploy development"){
             when {
                 branch "develop"
             }
             steps{
-                tomcatdeploy("172.31.80.36","ec2-user","tomcat-dev")
-            }
-            input {
-              message 'Are you sure?'
-              ok 'yes'
+                tomcatDeploy("172.31.80.36","ec2-user","tomcat-dev")
             }
         }
         stage("tomcat deploy qa"){
@@ -29,11 +25,7 @@ pipeline{
                 branch "qa"
             }
             steps{
-                tomcatdeploy("172.31.23.164","ec2-user","tomcat-dev-qa")
-            }
-            input {
-              message 'Are you sure?'
-              ok 'yes'
+                tomcatDeploy("172.31.23.164","ec2-user","tomcat-dev")
             }
         }
     }
