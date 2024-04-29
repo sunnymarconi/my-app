@@ -2,11 +2,6 @@
 pipeline{
     agent any
     stages{
-        stage("Git Checkout"){
-            steps{
-                git branch: 'qa', credentialsId: 'git-id', url: 'https://github.com/sunnymarconi/my-app.git'
-            }
-        }
         stage("Maven Build"){
             steps{
                 sh "mvn clean package"
