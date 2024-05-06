@@ -33,7 +33,7 @@ pipeline{
             }
             steps{
                 sshagent(['docker-id']) {
-                    sh "ssh -o StrictHostKeyChecking=no ec2-user@172.31.17.72 docker run -d -p 8080:8080 --name dockerCont2{env.BUILD_NUMBER} sunnysinha/appimage:${env.BUILD_NUMBER}"
+                    sh "ssh -o StrictHostKeyChecking=no ec2-user@172.31.17.72 docker run -d -p 8080:8080 --name dockerCont{env.BUILD_NUMBER} sunnysinha/appimage:${env.BUILD_NUMBER}"
                 }
             }
         }
