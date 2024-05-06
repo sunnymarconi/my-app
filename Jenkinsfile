@@ -25,6 +25,7 @@ pipeline{
             }
             steps{
                 sh "docker run -d -p 7070:8080 --name dockerCont${env.BUILD_NUMBER} sunnysinha/appimage:${env.BUILD_NUMBER}"
+                echo "Branch name-${env.BRANCH_NAME}"
             }
         }
         stage("Deploy to QA-tomcat"){
@@ -34,6 +35,7 @@ pipeline{
             steps{
                 sshagent(['docker-id']) {
                     sh "ssh -o StrictHostKeyChecking=no ec2-user@172.31.17.72 docker run -d -p 8080:8080 --name dockerCont${env.BUILD_NUMBER} sunnysinha/appimage:${env.BUILD_NUMBER}"
+                    echo "Branch name-${env.BRANCH_NAME}
                 }
             }
         }
