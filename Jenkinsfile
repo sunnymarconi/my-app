@@ -1,4 +1,3 @@
-@Library("sunnylibs") _
 pipeline{
     agent any
     stages{
@@ -7,22 +6,35 @@ pipeline{
                 sh "mvn clean package"
             }
         }
-        stage("Delpoy to Dev"){
+        stage("Dokcer Build"){
+            steps{
+                sh "docker build -t sunnysinha/appimage:${env.BUILD_NUMBER} ."
+            }
+        }
+        stage("Docker push"){
+            steps{
+                withCredentials([usernamePassword(credentialsId: 'Docker-id', passwordVariable: 'pwd', usernameVariable: 'user')]) {
+                    sh "docker login -u ${user} -p ${pwd}" 
+                    sh "docker push sunnysinha/appimage:${env.BUILD_NUMBER}"
+                }
+            }
+        }
+        stage("Deploy to Development-tomcat"){
             when {
                 branch "develop"
             }
             steps{
-                tomcatDeploy("172.31.80.36","ec2-user","tomcat-dev")
-
+                sh "docker run -d -p 7070:8080 --name dockerCont${env.BUILD_NUMBER} sunnysinha/appimage:${env.BUILD_NUMBER}"
             }
         }
-        stage("Delpoy to QA"){
+        stage("Deploy to QA-tomcat"){
             when {
                 branch "qa"
             }
             steps{
-                tomcatDeploy("172.31.23.164","ec2-user","tomcat-qa")
-
+                sshagent(['docker-id']) {
+                    sh "ssh -o StrictHostKeyChecking=no ec2-user@172.31.17.72 docker run -d -p 8080:8080 --name dockerCont2{env.BUILD_NUMBER} sunnysinha/appimage:${env.BUILD_NUMBER}"
+                }
             }
         }
     }
