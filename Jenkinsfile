@@ -27,7 +27,7 @@ pipeline{
         stage("Docker Deploy to Dev"){
             steps{
                 sshagent(['docker-id']) {
-                    sh "ssh -o StrictHostKeyChecking=no ec2-user@172.31.17.72 docker run -d -p 9090:8080 --name mavencontDEV sunnysinha/mavenproj:${env.BUILD_NUMBER}"
+                    sh "ssh -o StrictHostKeyChecking=no ec2-user@172.31.17.72 docker run -d -p 9090:8080 --name mavencontDEV-${env.BUILD_NUMBER} sunnysinha/mavenproj:${env.BUILD_NUMBER}"
                 }
             }
         }
