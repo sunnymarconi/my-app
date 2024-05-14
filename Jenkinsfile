@@ -1,54 +1,30 @@
 pipeline{
     agent any
     stages{
-        stage("Git checkout"){
-            steps{
-                git branch: 'develop', credentialsId: 'jenkin-creds', url: 'https://github.com/sunnymarconi/my-app.git'
-            }
-        }  
         stage("Maven Build"){
             steps{
                 sh "mvn clean package"
             }
         }
-        stage("Docker build"){
+        stage("Docker Build"){
             steps{
-                sh "docker build -t sunnysinha/tomcatapp:v1 ."
+                sh "docker build -t sunnysinha/mavenproj:${env.BUILD_NUMBER} ."
             }
         }
-        stage("Docker Push"){
+        stage("Docker push"){
             steps{
-                echo "Pushing to Docker hub"
+                withCredentials([usernamePassword(credentialsId: 'dockerId', passwordVariable: 'pwd', usernameVariable: 'user')]) {
+                    sh "docker login -u ${user} -p ${pwd}"
+                    sh "docker push sunnysinha/mavenproj:${env.BUILD_NUMBER}"
+                }
             }
         }
-        stage("Deploy to Development"){
-            when {
-                branch 'develop'
-            }
+        stage("Docker Deploy to QA"){
             steps{
-                echo "Deployed to dev...."
-                sh "branch name ${env.BRANCH_NAME}"
-
+                sshagent(['docker-id']) {
+                    sh "ssh -o StrictHostKeyChecking=no ec2-user@172.31.17.72 docker run -d -p 7070:8080 --name mavencontPROD sunnysinha/mavenproj:${env.BUILD_NUMBER}"
+                }
             }
-        }
-        stage("Deploy to qa"){
-            when {
-                branch 'qa'
-            }
-            steps {
-                echo "deploying to qa ...."
-                echo "  ${env.BRANCH_NAME} "
-            }
-        }
-        stage("Deploy to production"){
-            when {
-                branch 'master'
-            }
-            steps{
-                echo "Deployed to production"
-                echo "${env.BRANCH_NAME}"
-            }
-            
         }
     }
 }
