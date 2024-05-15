@@ -19,7 +19,7 @@ pipeline{
                 }
             }
         }
-        stage("Docker Deploy to QA"){
+        stage("Docker Deploy to PROD"){
             steps{
                 sshagent(['docker-id']) {
                     sh "ssh -o StrictHostKeyChecking=no ec2-user@172.31.17.72 docker run -d -p 7070:8080 --name mavencontPROD sunnysinha/mavenproj:${env.BUILD_NUMBER}"
