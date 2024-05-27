@@ -13,7 +13,7 @@ pipeline{
         }
         stage("Docker push"){
             steps{
-                withCredentials([usernamePassword(credentialsId: 'dockerId', passwordVariable: 'pwd', usernameVariable: 'user')]) {
+                withCredentials([usernamePassword(credentialsId: 'docker-id', passwordVariable: 'pwd', usernameVariable: 'user')]) {
                     sh "docker login -u ${user} -p ${pwd}"
                     sh "docker push sunnysinha/newmavenproj:${env.BUILD_NUMBER}"
                 }
